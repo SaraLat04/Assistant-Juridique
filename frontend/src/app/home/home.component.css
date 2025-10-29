@@ -39,8 +39,8 @@
 }
 
 .am-logo {
-  width: 80px;
-  height: 80px;
+  width: 95px;
+  height: 95px;
   object-fit: contain;
 }
 
@@ -85,21 +85,31 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
 /* Hero Section */
 .hero-section {
   position: relative;
-  padding: 120px 20px 110px;
-  background: var(--am-navy);
+  padding: 0;
+  background: #0f2438;
   color: #ffffff;
   text-align: center;
   overflow: hidden;
 }
 
-.hero-image {
-  background: var(--am-navy) url('../../assets/hero-morocco.jpeg') center/cover no-repeat;
+/* Carousel */
+.hero-carousel { position: relative; height: 72vh; min-height: 520px; }
+.hero-slides { position: relative; height: 100%; }
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 600ms ease, transform 1000ms ease;
 }
+.hero-slide.active { opacity: 1; transform: scale(1); }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(15, 36, 56, 0.75) 0%, rgba(15, 36, 56, 0.6) 40%, rgba(15, 36, 56, 0.5) 100%), var(--am-red-overlay);
+  background: linear-gradient(180deg, rgba(15, 36, 56, 0.65) 0%, rgba(15, 36, 56, 0.55) 40%, rgba(15, 36, 56, 0.45) 100%);
 }
 
 .hero-content {
@@ -107,6 +117,7 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
   z-index: 1;
   max-width: 800px;
   margin: 0 auto;
+  padding: 120px 20px 110px;
 }
 
 .hero-title {
@@ -155,6 +166,28 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
 
 .hero-decoration { display: none; }
 
+.hero-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.9);
+  color: #0f2438;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+}
+.hero-prev { left: 20px; }
+.hero-next { right: 20px; }
+
+.hero-dots { position: absolute; left: 0; right: 0; bottom: 24px; display: flex; gap: 8px; justify-content: center; }
+.hero-dots .dot {
+  width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); background: transparent; cursor: pointer;
+}
+.hero-dots .dot.active { background: var(--am-gold); border-color: var(--am-gold); }
+
 /* Features Section */
 .features-section {
   padding: 80px 20px;
@@ -195,10 +228,11 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
 
 .feature-icon {
   display: inline-flex;
-  padding: 20px;
-  background: linear-gradient(135deg, var(--am-gold) 0%, var(--am-navy) 100%);
-  border-radius: 50%;
-  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--am-navy);
+  border: 2px solid var(--am-gold);
+  border-radius: 16px;
+  margin-bottom: 20px;
   color: white;
 }
 
@@ -218,7 +252,7 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
 /* How it works Section */
 .how-it-works-section {
   padding: 80px 20px;
-  background: #f4f6f9;
+  background: #f6f8fb;
 }
 
 .steps {
@@ -239,16 +273,17 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
 
 .step-number {
   flex-shrink: 0;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--am-navy) 0%, var(--am-gold) 100%);
+  background: var(--am-navy);
+  border: 2px solid var(--am-gold);
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  border-radius: 50%;
+  border-radius: 12px;
 }
 
 .step-content h3 {
@@ -301,7 +336,7 @@ html[data-theme='dark'] .theme-toggle .icon-moon { display: block; stroke: #d4af
 /* CTA Section */
 .cta-section {
   padding: 80px 20px;
-  background: linear-gradient(135deg, var(--am-navy) 0%, #152f49 100%);
+  background: #0f2438;
   color: white;
   text-align: center;
 }

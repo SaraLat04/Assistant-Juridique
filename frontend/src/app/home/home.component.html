@@ -4,7 +4,7 @@
     <div class="am-nav-inner">
       <a class="am-brand" routerLink="/">
         <img src="assets/logo-al-mohami.png" alt="AL MOHAMI" class="am-logo" />
-        <span class="am-title">AL MOHAMI</span>
+        <span class="am-title">AL MOHAMI - ASSISTANT</span>
       </a>
       <div class="am-right">
         <img src="assets/ministry-justice.png" alt="Ministère de la Justice" class="am-ministry-logo" />
@@ -12,18 +12,39 @@
     </div>
   </header>
 
-  <!-- Hero Section (Image background) -->
-  <section class="hero-section hero-image">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <h1 class="hero-title">Assistant Juridique du Maroc</h1>
-      <p class="hero-subtitle">Des réponses fiables basées sur la législation marocaine</p>
-      <a routerLink="/chat" class="cta-button">
-        <span>Démarrer la consultation</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </a>
+  <!-- Hero Section with Carousel -->
+  <section class="hero-section">
+    <div class="hero-carousel" (mouseenter)="stopAutoRotate()" (mouseleave)="startAutoRotate()">
+      <div class="hero-slides">
+        <div
+          class="hero-slide"
+          *ngFor="let s of slides; let i = index"
+          [class.active]="i === currentSlide"
+          [ngStyle]="{ 'background-image': 'url(' + s.image + ')' }">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <h1 class="hero-title">{{ s.title }}</h1>
+            <p class="hero-subtitle">{{ s.subtitle }}</p>
+            <a routerLink="/chat" class="cta-button">
+              <span>Démarrer la consultation</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <button class="hero-nav hero-prev" (click)="prevSlide()" aria-label="Précédent">&#10094;</button>
+      <button class="hero-nav hero-next" (click)="nextSlide()" aria-label="Suivant">&#10095;</button>
+      <div class="hero-dots">
+        <button
+          *ngFor="let s of slides; let i = index"
+          class="dot"
+          [class.active]="i === currentSlide"
+          (click)="goToSlide(i)"
+          [attr.aria-label]="'Aller au slide ' + (i + 1)">
+        </button>
+      </div>
     </div>
   </section>
 
