@@ -1,0 +1,12 @@
+Flask
+Flask-Cors
+SQLAlchemy
+pandas
+chromadb
+sentence-transformers
+torch
+transformers
+python-dotenv
+
+
+

@@ -1,0 +1,18 @@
+/* Global theme to harmonize with AL MOHAMI */
+:root {
+  --am-navy: #0f2438;
+  --am-gold: #d4af37;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+a { color: inherit; }

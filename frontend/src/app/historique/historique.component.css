@@ -1,0 +1,277 @@
+/* Dark theme overrides when inside chat dark layout */
+:host-context(.dark-theme) .history-actions {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+:host-context(.dark-theme) .new-chat-btn {
+  background: var(--am-gold);
+  color: var(--am-navy);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+}
+
+:host-context(.dark-theme) .new-chat-btn:hover {
+  box-shadow: 0 14px 28px rgba(212, 175, 55, 0.45);
+}
+
+:host-context(.dark-theme) .history-title {
+  color: #c1c9d4;
+}
+
+:host-context(.dark-theme) .history-section::-webkit-scrollbar-thumb {
+  background: #2a3e55;
+}
+
+:host-context(.dark-theme) .history-item {
+  background: transparent;
+  border-color: transparent;
+}
+
+:host-context(.dark-theme) .history-item:hover {
+  background: #162c45;
+  border-color: #223a53;
+}
+
+:host-context(.dark-theme) .history-item.active {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+:host-context(.dark-theme) .history-item-title {
+  color: #eaf0f6;
+}
+
+:host-context(.dark-theme) .history-item-preview { color: #b7c2cf; }
+:host-context(.dark-theme) .history-item-date { color: #9fb0c6; }
+
+:host-context(.dark-theme) .history-item-delete {
+  background: rgba(220, 38, 38, 0.15);
+  color: #fecaca;
+}
+
+:host-context(.dark-theme) .history-item-delete:hover {
+  background: rgba(220, 38, 38, 0.25);
+}
+.history-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Bouton Nouvelle Conversation */
+.history-actions {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.new-chat-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--am-gold);
+  color: var(--am-navy);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.35);
+}
+
+.new-chat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(212, 175, 55, 0.45);
+}
+
+.new-chat-btn:active {
+  transform: translateY(0);
+}
+
+/* Section Historique */
+.history-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.history-section::-webkit-scrollbar {
+  width: 5px;
+}
+
+.history-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-section::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.history-section::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.history-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 8px;
+}
+
+/* Liste Historique */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Item Historique */
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.history-item:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.history-item.active {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: var(--am-gold);
+}
+
+.history-item-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--am-navy);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.history-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-item-preview {
+  font-size: 12px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+
+.history-item-date {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Bouton Supprimer */
+.history-item-delete {
+  opacity: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.history-item:hover .history-item-delete {
+  opacity: 1;
+}
+
+.history-item-delete:hover {
+  background: #fecaca;
+  transform: scale(1.05);
+}
+
+.history-item-delete:active {
+  transform: scale(0.95);
+}
+
+/* État Vide */
+.empty-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.empty-history svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-history p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.empty-history span {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .history-container {
+    padding-bottom: 20px;
+  }
+
+  .history-item {
+    padding: 10px;
+  }
+
+  .history-item-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .history-item-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+}
