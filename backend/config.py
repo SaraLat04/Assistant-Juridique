@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 # Load environment variables from a local .env file if present
 load_dotenv()
 
+
 # API keys and tokens (never hardcode secrets here)
 HF_TOKEN = os.getenv("HF_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

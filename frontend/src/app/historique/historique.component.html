@@ -29,8 +29,8 @@
         
         <div class="history-item-content">
           <div class="history-item-title">{{ item.title }}</div>
-          <div class="history-item-preview">{{ item.preview }}</div>
-          <div class="history-item-date">{{ getRelativeTime(item.date) }}</div>
+          <div class="history-item-preview">{{ item.last_message?.text || '' }}</div>
+          <div class="history-item-date">{{ getRelativeTime(item.last_message?.timestamp || item.created_at) }}</div>
         </div>
         
         <button class="history-item-delete" 

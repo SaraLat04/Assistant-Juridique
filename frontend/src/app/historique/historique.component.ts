@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChatServiceService } from '../../services/chat-service.service';
 
 interface HistoryItem {
-  id: number;
+  id: string;
   title: string;
-  date: Date;
-  preview: string;
+  created_at: string;
+  last_message?: any;
 }
 
 @Component({
@@ -17,63 +18,43 @@ interface HistoryItem {
 })
 export class HistoriqueComponent implements OnInit {
   historyItems: HistoryItem[] = [];
-  selectedItemId: number | null = null;
+  selectedItemId: string | null = null;
+
+  @Output() selectConversation = new EventEmitter<string>();
+
+  constructor(private chatService: ChatServiceService) {}
 
   ngOnInit() {
-    // Charger l'historique depuis localStorage ou votre service
     this.loadHistory();
   }
 
-  loadHistory() {
-    // Exemple de données - remplacez par votre logique
-    // Vous pouvez charger depuis localStorage :
-    const saved = localStorage.getItem('chat_history');
-    if (saved) {
-      this.historyItems = JSON.parse(saved);
-    } else {
-      // Données d'exemple
-      this.historyItems = [
-        {
-          id: 1,
-          title: 'Droits du locataire',
-          date: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          preview: 'Quels sont les droits du locataire en cas de litige ?'
-        },
-        {
-          id: 2,
-          title: 'Contrat de travail',
-          date: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          preview: 'Comment rédiger un contrat de travail conforme ?'
-        },
-        {
-          id: 3,
-          title: 'Création d\'entreprise',
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-          preview: 'Procédure pour créer une société SARL'
-        }
-      ];
+  async loadHistory() {
+    try {
+      const convs = await this.chatService.listConversations();
+      this.historyItems = convs.map((c: any) => ({
+        id: c.id,
+        title: c.title || 'Conversation',
+        created_at: c.created_at,
+        last_message: c.last_message
+      }));
+    } catch (e) {
+      console.warn('Impossible de charger l\'historique depuis le backend', e);
+      this.historyItems = [];
     }
   }
 
-  selectItem(id: number) {
+  selectItem(id: string) {
     this.selectedItemId = id;
-    // TODO: Émettre un événement ou appeler un service pour charger la conversation
-    console.log('Conversation sélectionnée:', id);
+    this.selectConversation.emit(id);
   }
 
-  deleteItem(id: number, event: Event) {
+  async deleteItem(id: string, event: Event) {
     event.stopPropagation();
+    // Pour l'instant on enlève côté UI seulement (backend: suppression non implémentée)
     this.historyItems = this.historyItems.filter(item => item.id !== id);
-    
-    // Sauvegarder dans localStorage
-    localStorage.setItem('chat_history', JSON.stringify(this.historyItems));
-    
-    if (this.selectedItemId === id) {
-      this.selectedItemId = null;
-    }
   }
 
-  getRelativeTime(date: Date): string {
+  getRelativeTime(date: string): string {
     const now = new Date();
     const diffMs = now.getTime() - new Date(date).getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -89,27 +70,6 @@ export class HistoriqueComponent implements OnInit {
 
   newChat() {
     this.selectedItemId = null;
-    // TODO: Émettre un événement pour démarrer une nouvelle conversation
-    console.log('Nouvelle conversation');
-  }
-
-  // Méthode pour ajouter une conversation à l'historique
-  addToHistory(title: string, preview: string) {
-    const newItem: HistoryItem = {
-      id: Date.now(),
-      title: title,
-      date: new Date(),
-      preview: preview
-    };
-    
-    this.historyItems.unshift(newItem); // Ajouter au début
-    
-    // Limiter à 50 conversations
-    if (this.historyItems.length > 50) {
-      this.historyItems = this.historyItems.slice(0, 50);
-    }
-    
-    // Sauvegarder dans localStorage
-    localStorage.setItem('chat_history', JSON.stringify(this.historyItems));
+    this.selectConversation.emit(null as any);
   }
 }
