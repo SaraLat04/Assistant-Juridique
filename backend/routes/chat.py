@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from services.llm_service import ask_juridique, ask_general
+from services.llm_service import ask_juridique
 from services.vector_db import init_chroma
 from services.conversation_db import init_db, create_conversation, add_message, get_conversation, list_conversations
 from config import TOP_K
@@ -19,7 +19,7 @@ init_db()
 # ================================
 # 🎯 Seuil de pertinence
 # ================================
-SIMILARITY_THRESHOLD = 0.7
+SIMILARITY_THRESHOLD = 0.3  # Réduit pour accepter plus de résultats
 
 
 # ================================
@@ -28,8 +28,8 @@ SIMILARITY_THRESHOLD = 0.7
 @chat_bp.route('/ask', methods=['POST'])
 def ask():
     """
-    Endpoint pour poser une question à l'assistant.
-    Répond aux questions juridiques ET générales.
+    Endpoint pour poser une question juridique.
+    MODE JURIDIQUE UNIQUEMENT - Toujours avec références.
     """
     try:
         data = request.json
@@ -44,50 +44,86 @@ def ask():
 
         print(f"\n🔍 Question reçue : {question}")
 
-        # Créer une conversation si besoin et enregistrer le message utilisateur
+        # Créer une conversation si besoin
         if not conversation_id:
-            # utiliser un extrait de la question comme titre
             title = (question[:80] + '...') if len(question) > 80 else question
             conversation_id = create_conversation(title=title)
 
+        # Enregistrer le message utilisateur
         try:
             add_message(conversation_id, 'user', question, datetime.utcnow().isoformat())
         except Exception as e:
             print(f"⚠️ Erreur enregistre message utilisateur : {e}")
 
         # Recherche dans la base ChromaDB
+        print(f"🔎 Recherche dans ChromaDB (Top {TOP_K})...")
         results = collection.query(
             query_texts=[question],
             n_results=TOP_K
         )
 
-        # Vérification de la pertinence
+        # Récupération des résultats
         distances = results.get('distances', [[]])[0]
         documents = results.get('documents', [[]])[0]
         metadatas = results.get('metadatas', [[]])[0]
 
-        # Filtrer les résultats selon le seuil de similarité
+        # 🔍 DEBUG : Afficher TOUS les résultats
+        print(f"\n🐛 DEBUG - Tous les résultats (avant filtrage) :")
+        for i, (dist, doc, meta) in enumerate(zip(distances, documents, metadatas), 1):
+            similarity = 1 - (dist / 2)
+            print(f"\n   📄 Résultat {i}:")
+            print(f"      Distance: {dist:.4f}")
+            print(f"      Similarité: {similarity:.4f}")
+            print(f"      Source: {meta.get('doc', meta.get('source', 'N/A'))}")
+            print(f"      Article: {meta.get('article', 'N/A')}")
+            print(f"      Extrait: {doc[:100]}...")
+
+        # Filtrer selon le seuil de similarité
         relevant_docs = []
         relevant_metas = []
 
+        print(f"\n📊 Filtrage (seuil = {SIMILARITY_THRESHOLD}) :")
         for i, distance in enumerate(distances):
-            if distance < SIMILARITY_THRESHOLD:
+            # Convertir distance en similarité (0-1)
+            similarity = 1 - (distance / 2)
+            
+            if similarity >= SIMILARITY_THRESHOLD:
                 relevant_docs.append(documents[i])
                 relevant_metas.append(metadatas[i])
+                print(f"   ✅ Document {i+1} : pertinent (similarité={similarity:.3f})")
+            else:
+                print(f"   ❌ Document {i+1} : non pertinent (similarité={similarity:.3f})")
 
         nb_results = len(relevant_docs)
-        print(f"📊 Articles pertinents trouvés : {nb_results}")
+        print(f"\n📊 Total articles pertinents : {nb_results}")
 
         # ================================
-        # 🔀 BIFURCATION : Juridique ou Général
+        # ⚖️ MODE JURIDIQUE UNIQUEMENT
         # ================================
 
         if nb_results == 0:
-            # ⭐ Question non juridique → Utiliser l'IA générale
-            print("💬 Question générale détectée → Mode assistant universel")
-            answer = ask_general(question)
+            # Aucun article trouvé → Message d'erreur clair
+            print("❌ Aucun article pertinent trouvé dans la base")
+            
+            answer = """❌ **Aucun article pertinent trouvé**
 
-            # Enregistrer la réponse du bot
+Votre question ne semble pas correspondre aux documents juridiques disponibles dans notre base de données.
+
+💡 **Suggestions :**
+- Reformulez votre question de manière plus précise
+- Utilisez des termes juridiques (ex: "vol", "divorce", "contrat", "héritage")
+- Vérifiez l'orthographe
+
+📚 **Domaines couverts :**
+- Code pénal marocain
+- Code civil
+- Code de la famille
+- Code du travail
+- Code de commerce
+
+_💼 Assistant Juridique Marocain_"""
+
+            # Enregistrer la réponse
             try:
                 add_message(conversation_id, 'bot', answer, datetime.utcnow().isoformat())
             except Exception as e:
@@ -97,32 +133,33 @@ def ask():
                 "question": question,
                 "answer": answer,
                 "sources_count": 0,
-                "mode": "general",
+                "mode": "juridique",
+                "status": "no_results",
                 "conversation_id": conversation_id
             })
 
         else:
-            # ⚖️ Question juridique → Utiliser le mode juridique
-            print("⚖️ Question juridique détectée → Mode assistant juridique")
+            # Articles trouvés → Génération de la réponse juridique
+            print("⚖️ Mode juridique activé → Génération de la réponse avec LLM")
 
-            # Construire le contexte à partir des documents pertinents
+            # Construire le contexte
             context = ""
             for i, doc in enumerate(relevant_docs):
                 meta = relevant_metas[i]
-                doc_name = str(meta.get('DOC', 'Document inconnu')).strip()
-                article = str(meta.get('Article', 'Article sans titre')).strip()
+                doc_name = str(meta.get('doc', meta.get('source', 'Document inconnu'))).strip()
+                article = str(meta.get('article', 'Article sans titre')).strip()
                 doc_text = str(doc).strip()
 
                 context += f"{doc_name} - {article}\n{doc_text}\n\n"
 
-            print(f"📝 Taille du contexte : {len(context)} caractères")
+            print(f"📝 Contexte construit : {len(context)} caractères")
 
-            # Générer la réponse juridique
+            # Générer la réponse avec LLM + références
             answer = ask_juridique(question, context)
 
-            print(f"✅ Réponse générée ({len(answer)} caractères).")
+            print(f"✅ Réponse générée avec succès ({len(answer)} caractères)")
 
-            # Enregistrer la réponse du bot
+            # Enregistrer la réponse
             try:
                 add_message(conversation_id, 'bot', answer, datetime.utcnow().isoformat())
             except Exception as e:
@@ -133,6 +170,7 @@ def ask():
                 "answer": answer,
                 "sources_count": nb_results,
                 "mode": "juridique",
+                "status": "success",
                 "conversation_id": conversation_id
             })
 
@@ -148,9 +186,8 @@ def ask():
 
 
 # ================================
-# 🗂️ Endpoints d'historique de conversation
+# 🗂️ Endpoints d'historique
 # ================================
-
 
 @chat_bp.route('/conversations', methods=['POST'])
 def create_conv():
@@ -190,7 +227,7 @@ def post_message(conv_id):
 
 
 # ================================
-# 🩺 Endpoint de santé : /health
+# 🩺 Endpoint de santé
 # ================================
 @chat_bp.route('/health', methods=['GET'])
 def health():
@@ -201,7 +238,8 @@ def health():
         return jsonify({
             "status": "✅ OK",
             "collection": collection.name,
-            "documents_count": collection.count()
+            "documents_count": collection.count(),
+            "mode": "juridique_uniquement"
         })
     except Exception as e:
         return jsonify({
